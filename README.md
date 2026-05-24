@@ -123,6 +123,15 @@ python query_weather.py conditions
 python query_weather.py country "Japan"
 ```
 
+### 5. View the Dashboard (Optional)
+Launch the interactive Streamlit dashboard to explore your data visually:
+
+```bash
+streamlit run app.py
+```
+
+This opens a browser window at `http://localhost:8501` with interactive charts and filters.
+
 ---
 
 ## Troubleshooting

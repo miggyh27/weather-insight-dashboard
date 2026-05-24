@@ -27,7 +27,7 @@ def print_summary(db_path: Path) -> None:
     print(f"Total records: {summary['total_records']}")
     print(f"Countries: {summary['countries']}")
     print(f"Cities: {summary['cities']}")
-    print(f"Average temperature: {summary['avg_temperature_celsius']}°C" if summary['avg_temperature_celsius'] else "Average temperature: N/A")
+    print(f"Average temperature: {summary['avg_temperature_celsius']}°C" if summary['avg_temperature_celsius'] is not None else "Average temperature: N/A")
     print(f"Unique conditions: {summary['unique_conditions']}")
     print()
 
@@ -41,7 +41,7 @@ def print_countries(db_path: Path) -> None:
     print(f"{'Country':<30} {'Records':<10} {'Avg Temp (°C)':<15}")
     print("-" * 55)
     for c in countries:
-        temp_str = f"{c['avg_temp']:.1f}" if c['avg_temp'] else "N/A"
+        temp_str = f"{c['avg_temp']:.1f}" if c['avg_temp'] is not None else "N/A"
         print(f"{c['country']:<30} {c['count']:<10} {temp_str:<15}")
     print()
 
@@ -95,9 +95,9 @@ def print_country_data(db_path: Path, country: str) -> None:
     print(f"{'City':<25} {'Temp (°C)':<12} {'Condition':<20} {'Humidity (%)':<12} {'Wind (km/h)':<12}")
     print("-" * 81)
     for row in data:
-        temp_str = f"{row['temperature_celsius']:.1f}" if row['temperature_celsius'] else "N/A"
-        humidity_str = f"{row['humidity_percent']:.0f}" if row['humidity_percent'] else "N/A"
-        wind_str = f"{row['wind_speed_kmh']:.1f}" if row['wind_speed_kmh'] else "N/A"
+        temp_str = f"{row['temperature_celsius']:.1f}" if row['temperature_celsius'] is not None else "N/A"
+        humidity_str = f"{row['humidity_percent']:.0f}" if row['humidity_percent'] is not None else "N/A"
+        wind_str = f"{row['wind_speed_kmh']:.1f}" if row['wind_speed_kmh'] is not None else "N/A"
         print(f"{row['city']:<25} {temp_str:<12} {row['condition']:<20} {humidity_str:<12} {wind_str:<12}")
     print()
 
