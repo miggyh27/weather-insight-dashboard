@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from typing import Tuple, Dict, Any
 import pandas as pd
+from weather_capstone.logging_config import log_execution_time
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +116,7 @@ def extract_country_from_url(url: str) -> str | None:
     }
     return slug_mappings.get(country_slug, country_slug)
 
+@log_execution_time("weather_capstone.cleaner")
 def clean_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     stats = {}
     stats["raw_rows"] = len(df)

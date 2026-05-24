@@ -1,9 +1,11 @@
 import logging
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
 from urllib.parse import urljoin
+from contextlib import contextmanager
+from weather_capstone.logging_config import log_execution_time
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -41,6 +43,15 @@ def build_driver() -> webdriver.Chrome:
         {"source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"}
     )
     return driver
+
+@contextmanager
+def get_driver():
+    """Context manager for cleaner WebDriver lifecycle management."""
+    driver = build_driver()
+    try:
+        yield driver
+    finally:
+        driver.quit()
 
 def wait_for_page_ready(driver: webdriver.Chrome, timeout: int = 15) -> bool:
     try:
@@ -131,7 +142,7 @@ def scrape_page(driver: webdriver.Chrome, url: str, fallback_city: str = "") -> 
                 return None
             time.sleep(SCRAPE_DELAY_SECONDS * 2)
 
-    scraped_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    scraped_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
     h1_text = safe_text(driver, (By.TAG_NAME, "h1"))
     city = fallback_city
@@ -217,10 +228,10 @@ def scrape_page(driver: webdriver.Chrome, url: str, fallback_city: str = "") -> 
         source_url=url
     )
 
+@log_execution_time("weather_capstone.scraper")
 def scrape_all(limit: int = 0) -> List[WeatherRecord]:
-    driver = build_driver()
     records: List[WeatherRecord] = []
-    try:
+    with get_driver() as driver:
         cities = discover_pages(driver)
         if not cities:
             logger.error("No cities discovered. Scrape operation aborted.")
@@ -242,9 +253,6 @@ def scrape_all(limit: int = 0) -> List[WeatherRecord]:
                 logger.error("Unexpected error scraping city %s: %s", city_name, ex)
             
             time.sleep(SCRAPE_DELAY_SECONDS)
-
-    finally:
-        driver.quit()
 
     logger.info("Scrape cycle complete. Total records collected: %d", len(records))
     return records

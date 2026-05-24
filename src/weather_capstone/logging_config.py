@@ -1,6 +1,8 @@
 import logging
 import sys
-from typing import Optional
+import time
+from functools import wraps
+from typing import Optional, Callable, Any
 
 def configure_logging(level: int = logging.INFO, log_file: Optional[str] = None) -> None:
     root_logger = logging.getLogger()
@@ -25,3 +27,17 @@ def configure_logging(level: int = logging.INFO, log_file: Optional[str] = None)
         format=log_format,
         handlers=handlers
     )
+
+def log_execution_time(logger_name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """Decorator to measure and log execution time of functions."""
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            logger = logging.getLogger(logger_name)
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            elapsed_time = time.perf_counter() - start_time
+            logger.info(f"Function '{func.__name__}' completed in {elapsed_time:.3f} seconds")
+            return result
+        return wrapper
+    return decorator

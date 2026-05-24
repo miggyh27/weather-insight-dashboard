@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from contextlib import contextmanager
 
 from weather_capstone.config import DEFAULT_SQLITE_PATH
+from weather_capstone.logging_config import log_execution_time
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,8 @@ def get_connection(db_path: Optional[Path] = None):
     
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
     try:
         yield conn
     finally:
@@ -47,9 +50,15 @@ def create_table(conn: sqlite3.Connection) -> None:
     logger.info(f"Table {TABLE_NAME} created or already exists")
 
 
-def insert_record(conn: sqlite3.Connection, record: Dict[str, Any]) -> bool:
+def insert_record(conn: sqlite3.Connection, record: Dict[str, Any], commit: bool = True) -> bool:
     """Insert a single weather record, handling duplicates."""
     try:
+        temp_val = record.get("temperature_celsius") if "temperature_celsius" in record else record.get("temperature_c")
+        humidity_val = record.get("humidity_percent") if "humidity_percent" in record else record.get("humidity_pct")
+        wind_val = record.get("wind_speed_kmh") if "wind_speed_kmh" in record else record.get("wind_speed_kph")
+        pressure_val = record.get("pressure_hpa") if "pressure_hpa" in record else record.get("pressure_mb")
+        time_val = record.get("local_time") if "local_time" in record else record.get("local_time_raw")
+
         conn.execute(f"""
             INSERT INTO {TABLE_NAME} (
                 city, country, temperature_celsius, condition, humidity_percent,
@@ -58,32 +67,35 @@ def insert_record(conn: sqlite3.Connection, record: Dict[str, Any]) -> bool:
         """, (
             record.get("city"),
             record.get("country"),
-            record.get("temperature_celsius"),
+            temp_val,
             record.get("condition"),
-            record.get("humidity_percent"),
-            record.get("wind_speed_kmh"),
-            record.get("pressure_hpa"),
-            record.get("local_time"),
+            humidity_val,
+            wind_val,
+            pressure_val,
+            time_val,
             record.get("scraped_at"),
             record.get("source_url")
         ))
-        conn.commit()
+        if commit:
+            conn.commit()
         return True
     except sqlite3.IntegrityError:
         logger.debug(f"Duplicate record skipped: {record.get('city')}, {record.get('country')}, {record.get('scraped_at')}")
         return False
 
 
+@log_execution_time("weather_capstone.database")
 def insert_records(conn: sqlite3.Connection, records: List[Dict[str, Any]]) -> Tuple[int, int]:
     """Insert multiple records, returning (inserted_count, duplicate_count)."""
     inserted = 0
     duplicates = 0
     
-    for record in records:
-        if insert_record(conn, record):
-            inserted += 1
-        else:
-            duplicates += 1
+    with conn:
+        for record in records:
+            if insert_record(conn, record, commit=False):
+                inserted += 1
+            else:
+                duplicates += 1
     
     logger.info(f"Inserted {inserted} records, skipped {duplicates} duplicates")
     return inserted, duplicates
