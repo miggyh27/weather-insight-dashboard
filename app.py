@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import sys
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent / "src"))
 
 from weather_capstone.database import get_connection
 from weather_capstone.config import DEFAULT_SQLITE_PATH
