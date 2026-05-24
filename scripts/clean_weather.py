@@ -12,6 +12,19 @@ from weather_capstone import cleaner
 
 logger = logging.getLogger("clean_weather")
 
+def get_latest_raw_file() -> Path:
+    """Find the most recent raw CSV file in data/raw/."""
+    raw_dir = Path("data/raw")
+    if not raw_dir.exists():
+        raise FileNotFoundError("data/raw/ directory does not exist. Run scrape_weather.py first.")
+    
+    files = list(raw_dir.glob("weather_raw_*.csv"))
+    if not files:
+        raise FileNotFoundError("No raw CSV files found in data/raw/. Run scrape_weather.py first.")
+    
+    return max(files, key=lambda f: f.stat().st_mtime)
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Clean raw scraped weather data and export to clean CSV with a markdown summary."
@@ -19,8 +32,8 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=str,
-        required=True,
-        help="Path to the raw input weather CSV file."
+        default=None,
+        help="Path to the raw input weather CSV file (default: most recent file in data/raw/)"
     )
     parser.add_argument(
         "--output",
@@ -91,7 +104,16 @@ def main() -> None:
     args = parse_arguments()
     configure_logging(level=logging.INFO)
 
-    input_path = Path(args.input).resolve()
+    if args.input:
+        input_path = Path(args.input).resolve()
+    else:
+        try:
+            input_path = get_latest_raw_file()
+            logger.info("Auto-detected latest raw file: %s", input_path)
+        except FileNotFoundError as e:
+            logger.error(str(e))
+            sys.exit(1)
+    
     if not input_path.exists():
         logger.error("Input file not found: %s", input_path)
         sys.exit(1)

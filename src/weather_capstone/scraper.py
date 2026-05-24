@@ -59,9 +59,6 @@ def safe_text(parent: Any, selector: Tuple[By, str]) -> str | None:
     except NoSuchElementException:
         return None
 
-def parse_weather_card(element: Any, source_url: str) -> WeatherRecord | None:
-    return None
-
 def discover_pages(driver: webdriver.Chrome) -> List[Tuple[str, str]]:
     logger.info("Accessing main weather index: %s", WEATHER_SITE_URL)
     retries = 0
