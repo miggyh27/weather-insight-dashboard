@@ -172,3 +172,4 @@ data/database/*
 .goals/
 goal_*.md
 reports/cleaning_summary.md
+reports/pr_summary.md

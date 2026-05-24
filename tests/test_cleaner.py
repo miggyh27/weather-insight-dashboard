@@ -292,3 +292,40 @@ def test_clean_data_fahrenheit_conversion():
     assert cleaned_df["temperature_f"].iloc[0] == 77.0
     assert cleaned_df["wind_speed_kph"].iloc[0] == 16.1
     assert cleaned_df["pressure_mb"].iloc[0] == 1013.2
+
+
+def test_comfort_bands():
+    """Test comfort band classifications based on temperature."""
+    df = pd.DataFrame({
+        "city": ["A", "B", "C", "D", "E"],
+        "country": ["C1", "C2", "C3", "C4", "C5"],
+        "temperature_raw": ["35°C", "28°C", "21°C", "15°C", "5°C"],
+        "condition": ["Clear", "Clear", "Clear", "Clear", "Clear"],
+        "humidity_raw": ["50%", "50%", "50%", "50%", "50%"],
+        "wind_raw": ["10 km/h", "10 km/h", "10 km/h", "10 km/h", "10 km/h"],
+        "pressure_raw": ["1013 mb", "1013 mb", "1013 mb", "1013 mb", "1013 mb"],
+        "local_time_raw": ["12:00", "12:00", "12:00", "12:00", "12:00"],
+        "scraped_at": [
+            "2024-01-01 12:00:00",
+            "2024-01-01 12:00:00",
+            "2024-01-01 12:00:00",
+            "2024-01-01 12:00:00",
+            "2024-01-01 12:00:00",
+        ],
+        "source_url": [
+            "https://www.timeanddate.com/weather/c1/a",
+            "https://www.timeanddate.com/weather/c2/b",
+            "https://www.timeanddate.com/weather/c3/c",
+            "https://www.timeanddate.com/weather/c4/d",
+            "https://www.timeanddate.com/weather/c5/e",
+        ]
+    })
+    
+    cleaned_df, _ = clean_data(df)
+    
+    assert cleaned_df.loc[cleaned_df["city"] == "A", "comfort_band"].iloc[0] == "Very Hot"
+    assert cleaned_df.loc[cleaned_df["city"] == "B", "comfort_band"].iloc[0] == "Warm"
+    assert cleaned_df.loc[cleaned_df["city"] == "C", "comfort_band"].iloc[0] == "Comfortable"
+    assert cleaned_df.loc[cleaned_df["city"] == "D", "comfort_band"].iloc[0] == "Cool"
+    assert cleaned_df.loc[cleaned_df["city"] == "E", "comfort_band"].iloc[0] == "Cold"
+
