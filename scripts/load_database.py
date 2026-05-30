@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from weather_capstone.database import initialize_database, insert_records, get_connection
+from weather_capstone.database import create_table, insert_records, get_connection
 from weather_capstone.config import DEFAULT_SQLITE_PATH
 from weather_capstone.logging_config import configure_logging
 
@@ -40,7 +40,7 @@ def load_csv_to_database(csv_path: Path, db_path: Path) -> None:
     records = df.to_dict(orient="records")
     
     with get_connection(db_path) as conn:
-        initialize_database(db_path)
+        create_table(conn)
         inserted, duplicates = insert_records(conn, records)
     
     logger.info(f"Database load complete: {inserted} inserted, {duplicates} duplicates skipped")

@@ -17,11 +17,15 @@ def parse_temperature(value: str) -> Tuple[float | None, str | None]:
         return None, None
         
     temp_val = float(match.group(1))
-    
-    if "°C" in value_clean or "C" in value_clean:
+
+    # prefer the explicit degree forms; fall back to a bare C, else default to F
+    if "°C" in value_clean:
         return temp_val, "C"
-    else:
+    if "°F" in value_clean:
         return temp_val, "F"
+    if "C" in value_clean and "F" not in value_clean:
+        return temp_val, "C"
+    return temp_val, "F"
 
 def parse_percentage(value: str) -> float | None:
     if pd.isna(value) or not isinstance(value, str):
