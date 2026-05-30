@@ -183,17 +183,20 @@ st.markdown("""
     }
 
     .js-plotly-plot .plotly .modebar {
-        background-color: rgba(24, 32, 38, 0.95) !important;
+        background-color: rgba(24, 32, 38, 0.9) !important;
         border: 1px solid #30404D !important;
-        border-radius: 4px !important;
-        padding: 4px 6px !important;
+        border-radius: 3px !important;
+        padding: 2px 4px !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
-        transform: scale(1.2) !important;
-        transform-origin: top right !important;
+        top: 35px !important;
+    }
+
+    .js-plotly-plot .plotly .modebar:empty {
+        display: none !important;
     }
     
     .js-plotly-plot .plotly .modebar-btn {
-        padding: 4px 6px !important;
+        padding: 2px 4px !important;
         transition: all 0.15s ease !important;
     }
     
@@ -537,7 +540,8 @@ python scripts/load_database.py
             borderwidth=1,
             font=dict(color="#A7B6C2")
         ),
-        margin=dict(l=40, r=20, t=50, b=40)
+        margin=dict(l=40, r=20, t=65, b=40),
+        hovermode="closest"
     )
 
     with tab1:

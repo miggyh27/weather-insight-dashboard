@@ -200,8 +200,7 @@ def get_by_country(conn: sqlite3.Connection, country: str) -> List[Dict[str, Any
     } for row in rows]
 
 
-def initialize_database(db_path: Optional[Path] = None) -> sqlite3.Connection:
-    """Initialize database and create table."""
+def initialize_database(db_path: Optional[Path] = None) -> None:
+    """Ensure the database file exists and has the weather table."""
     with get_connection(db_path) as conn:
         create_table(conn)
-        return conn

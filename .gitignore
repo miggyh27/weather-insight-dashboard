@@ -168,8 +168,7 @@ data/database/*
 *.sqlite
 *.db
 
-# Project-specific: Ignore our progress tracking goal files and the cleaning summary report
+# Project-specific: Ignore our progress tracking goal files
 .goals/
 goal_*.md
-reports/cleaning_summary.md
 reports/pr_summary.md

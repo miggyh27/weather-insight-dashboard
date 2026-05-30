@@ -15,7 +15,7 @@ logger = logging.getLogger("scrape_weather")
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Scrape current weather observations from Weather Around The World using Selenium."
+        description="Scrape current weather observations from the configured weather site (timeanddate.com) using Selenium."
     )
     parser.add_argument(
         "--limit",

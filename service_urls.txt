@@ -1,0 +1,2 @@
+Streamlit Community Cloud app URL:
+https://weather-insight-dashboard-ctd.streamlit.app/
